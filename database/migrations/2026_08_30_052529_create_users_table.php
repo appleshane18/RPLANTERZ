@@ -11,25 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // 1. Updated RPLANTERZ Users Table
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->id('user_id'); // Pinalitan ang default id()
+            $table->foreignId('branch_id')->constrained('branches', 'branch_id'); // Foreign key sa branches
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('email_verified_at')->nullable(); // Default Laravel (Mabuting i-keep para sa auth)
             $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->string('role'); // Owner, Cashier, Checker
+            $table->string('status')->default('active');
+            $table->timestamp('date_created')->useCurrent();
+            $table->rememberToken(); // Default Laravel
         });
 
+        // 2. Default Laravel Password Reset Tokens
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
+        // 3. Default Laravel Sessions
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->foreignId('user_id')->nullable()->index(); // Naka-link pa rin sa user_id
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
