@@ -12,7 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // register the aliases for our custom middlewares
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+            'password.change' => \App\Http\Middleware\EnsurePasswordIsChanged::class,
+        ]);
+
+        // automatic check the password change in all web routes
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsurePasswordIsChanged::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

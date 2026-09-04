@@ -11,7 +11,7 @@ class User extends Authenticatable
     public $timestamps = false;
 
     protected $fillable = [
-        'branch_id', 'name', 'email', 'password', 'role', 'status', 'date_created',
+        'branch_id', 'name', 'email', 'password', 'role', 'status', 'must_change_password', 'date_created',
     ];
 
     protected $hidden = ['password'];
@@ -30,5 +30,20 @@ class User extends Authenticatable
     }
     public function activityLogs() {
         return $this->hasMany(ActivityLog::class, 'user_id');
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->role === 'Owner';
+    }
+
+    public function isCashier(): bool
+    {
+        return $this->role === 'Cashier';
+    }
+
+    public function isChecker(): bool
+    {
+        return $this->role === 'Checker';
     }
 }
