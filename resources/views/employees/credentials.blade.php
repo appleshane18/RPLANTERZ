@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <div class="max-w-xl mx-auto p-6">
         <h2 class="text-lg font-semibold mb-4 text-green-700">Account Created Successfully</h2>
 
@@ -9,8 +9,8 @@
             <p><strong>Temporary Password:</strong> {{ $tempPassword }}</p>
         </div>
 
-        <p class="text-sm text-gray-500">
-            Note: Ipapakita lang ito ngayon — hindi na ito makikita ulit. Required baguhin
+        <p class="text-lg text-gray-500">
+            Note: Ipapakita lang ito ngayon â€” hindi na ito makikita ulit. Required baguhin
             ng employee ang password na ito sa unang login.
         </p>
 

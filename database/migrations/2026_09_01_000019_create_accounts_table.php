@@ -6,22 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id('account_id');
+            $table->string('account_code')->unique();
             $table->string('account_name');
-            $table->string('account_type'); // Asset, Liability, Equity, Revenue, Expense
-            $table->string('normal_balance'); // Debit or Credit
+            $table->string('account_type'); // asset | liability | equity | revenue | expense
+            $table->string('normal_balance'); // debit | credit
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('accounts');

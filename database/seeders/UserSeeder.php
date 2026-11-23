@@ -2,60 +2,75 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Branch;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Owner Account
-        User::create([
-            'branch_id' => 1,
-            'name' => 'Herbert',
-            'email' => 'herbert@rplanterz.com',
-            'password' => Hash::make('password123'),
-            'role' => 'Owner',
-            'status' => 'active',
-            'must_change_password' => false,
-            'date_created' => now(),
-        ]);
+        $kabacan = Branch::where('branch_name', 'like', '%Kabacan%')->first();
+        $mlang = Branch::where('branch_name', 'like', '%M\'lang%')->first();
 
-        // 2. Cashier Account
-        User::create([
-            'branch_id' => 1,
-            'name' => 'Cari',
-            'email' => 'cari@rplanterz.com',
-            'password' => Hash::make('password123'),
-            'role' => 'Cashier',
-            'status' => 'active',
-            'must_change_password' => false,
-            'date_created' => now(),
-        ]);
+        // 1 Owner (walang forced password change sa seed)
+        User::firstOrCreate(
+            ['email' => 'owner@rplanterz.com'],
+            [
+                'name' => 'Business Owner',
+                'password' => 'OwnerPass123!',
+                'role' => 'owner',
+                'branch_id' => null,
+                'status' => 'active',
+                'must_change_password' => false,
+            ]
+        );
 
-        // 3. Checker Account (Apple)
-        User::create([
-            'branch_id' => 1,
-            'name' => 'Apple',
-            'email' => 'apple@rplanterz.com',
-            'password' => Hash::make('password123'),
-            'role' => 'Checker',
-            'status' => 'active',
-            'must_change_password' => false,
-            'date_created' => now(),
-        ]);
+        $branches = array_filter([
+            ['branch' => $kabacan, 'prefix' => 'kab'],
+            ['branch' => $mlang, 'prefix' => 'mlg'],
+        ], fn ($item) => $item['branch'] !== null);
 
-        // 4. Isa pang Cashier (Amanda)
-        User::create([
-            'branch_id' => 1,
-            'name' => 'Amanda',
-            'email' => 'amanda@rplanterz.com',
-            'password' => Hash::make('password123'),
-            'role' => 'Cashier',
-            'status' => 'active',
-            'must_change_password' => false,
-            'date_created' => now(),
-        ]);
+        foreach ($branches as $entry) {
+            $branch = $entry['branch'];
+            $prefix = $entry['prefix'];
+
+            $staffList = [
+                [
+                    'name' => "{$branch->branch_name} Cashier 1",
+                    'email' => "cashier1.{$prefix}@rplanterz.com",
+                    'role' => 'cashier',
+                ],
+                [
+                    'name' => "{$branch->branch_name} Cashier 2",
+                    'email' => "cashier2.{$prefix}@rplanterz.com",
+                    'role' => 'cashier',
+                ],
+                [
+                    'name' => "{$branch->branch_name} Checker 1",
+                    'email' => "checker1.{$prefix}@rplanterz.com",
+                    'role' => 'checker',
+                ],
+                [
+                    'name' => "{$branch->branch_name} Checker 2",
+                    'email' => "checker2.{$prefix}@rplanterz.com",
+                    'role' => 'checker',
+                ],
+            ];
+
+            foreach ($staffList as $staff) {
+                User::firstOrCreate(
+                    ['email' => $staff['email']],
+                    [
+                        'name' => $staff['name'],
+                        'password' => 'TempPass123!',
+                        'role' => $staff['role'],
+                        'branch_id' => $branch->branch_id,
+                        'status' => 'active',
+                        'must_change_password' => true,
+                    ]
+                );
+            }
+        }
     }
 }

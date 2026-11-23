@@ -2,38 +2,97 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Branch;
+use App\Models\Inventory;
+use App\Models\Product;
+use App\Models\ProductBatch;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('products')->insert([
+        $branches = Branch::all();
+
+        $products = [
             [
-                'name' => 'Sample Fertilizer 1kg',
+                'barcode' => '4800001000011',
+                'name' => 'Urea Fertilizer (46-0-0) 50kg',
                 'category' => 'Fertilizer',
-                'description' => 'Organic fertilizer for crops',
-                'cost_price' => 80.00,
-                'selling_price' => 120.00,
-                'barcode' => '1234567890123',
-                'unit_of_measure' => 'kg',
-                'date_added' => now(),
+                'cost_price' => 1200.00,
+                'markup_percentage' => 20.00,
+                'selling_price' => 1440.00,
+                'unit_of_measure' => 'bag',
+                'description' => '50kg sack urea fertilizer',
+                'qty' => 25,
             ],
             [
-                'name' => 'Sample Pesticide 500ml',
-                'category' => 'Pesticide',
-                'description' => 'General purpose pesticide',
-                'cost_price' => 150.00,
-                'selling_price' => 220.00,
-                'barcode' => '1234567890124',
-                'unit_of_measure' => 'bottle',
-                'date_added' => now(),
+                'barcode' => '4800001000028',
+                'name' => 'Hybrid Corn Seeds 5kg',
+                'category' => 'Seeds',
+                'cost_price' => 950.00,
+                'markup_percentage' => 25.00,
+                'selling_price' => 1187.50,
+                'unit_of_measure' => 'pack',
+                'description' => '5kg pack hybrid corn seeds',
+                'qty' => 20,
             ],
-        ]);
+            [
+                'barcode' => '4800001000035',
+                'name' => 'Glyphosate Herbicide 1L',
+                'category' => 'Crop Protection',
+                'cost_price' => 280.00,
+                'markup_percentage' => 30.00,
+                'selling_price' => 364.00,
+                'unit_of_measure' => 'bottle',
+                'description' => '1L agricultural herbicide',
+                'qty' => 30,
+            ],
+        ];
+
+        foreach ($products as $index => $item) {
+            $product = Product::firstOrCreate(
+                ['barcode' => $item['barcode']],
+                [
+                    'name' => $item['name'],
+                    'category' => $item['category'],
+                    'cost_price' => $item['cost_price'],
+                    'markup_percentage' => $item['markup_percentage'],
+                    'selling_price' => $item['selling_price'],
+                    'unit_of_measure' => $item['unit_of_measure'],
+                    'description' => $item['description'],
+                    'image_url' => null,
+                ]
+            );
+
+            foreach ($branches as $bIndex => $branch) {
+                ProductBatch::firstOrCreate(
+                    [
+                        'product_id' => $product->product_id,
+                        'branch_id' => $branch->branch_id,
+                        'batch_name' => 'INIT-B' . ($index + 1) . '-' . ($bIndex + 1),
+                    ],
+                    [
+                        'supplier_name' => 'Opening Balance',
+                        'quantity_received' => $item['qty'],
+                        'quantity_remaining' => $item['qty'],
+                        'unit_cost' => $item['cost_price'],
+                        'date_received' => now()->toDateString(),
+                        'expiry_date' => now()->addYear()->toDateString(),
+                    ]
+                );
+
+                Inventory::firstOrCreate(
+                    [
+                        'product_id' => $product->product_id,
+                        'branch_id' => $branch->branch_id,
+                    ],
+                    [
+                        'quantity' => $item['qty'],
+                        'reorder_level' => 10,
+                    ]
+                );
+            }
+        }
     }
 }

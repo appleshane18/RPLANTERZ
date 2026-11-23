@@ -6,28 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('sales_transactions', function (Blueprint $table) {
             $table->id('transaction_id');
             $table->foreignId('cashier_id')->constrained('users', 'user_id');
             $table->foreignId('branch_id')->constrained('branches', 'branch_id');
-            $table->timestamp('transaction_date')->useCurrent();
-            $table->decimal('total_amount', 10, 2);
             $table->string('receipt_number')->unique();
-
-            // VAT fields
-            $table->boolean('is_vat_applied')->default(false);
-            $table->decimal('vat_amount', 10, 2)->default(0);
+            $table->decimal('subtotal_amount', 12, 2);
+            $table->decimal('discount_amount', 12, 2)->default(0);
+            $table->decimal('total_amount', 12, 2);
+            $table->decimal('cash_tendered', 12, 2)->default(0);
+            $table->decimal('change_amount', 12, 2)->default(0);
+            $table->string('payment_method')->default('cash'); // cash | credit
+            $table->string('sync_status')->default('synced');   // synced | pending_sync | flagged
+            $table->timestamp('transaction_date')->useCurrent();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('sales_transactions');

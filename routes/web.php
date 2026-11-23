@@ -1,39 +1,58 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Auth\ForcePasswordController;
-use App\Http\Controllers\EmployeeAccountController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BranchController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+// Public Landing Page (Fig. 3) & Catalog placeholder
+Route::get('/', fn () => view('welcome'))->name('landing');
+Route::get('/catalog', fn () => view('catalog.index'))->name('catalog.index');
+
+// Authentication (Fig. 4)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 });
-
-// --- Public Routes ---
-Route::get('/products', function () {
-    return view('products.index');
-})->name('products.index');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // --- Force Password Change Routes ---
-    Route::get('/force-password-change', [ForcePasswordController::class, 'show'])
-        ->name('password.force.form');
-    Route::post('/force-password-change', [ForcePasswordController::class, 'update'])
-        ->name('password.force.update');
+    // Forced Password Change (Fig. 5)
+    Route::get('/password/change', [AuthController::class, 'showForcePasswordChange'])->name('password.change');
+    Route::post('/password/change', [AuthController::class, 'updateForcePasswordChange'])->name('password.change.update');
+
+    // Protected Routes (dapat tapos na sa forced password change)
+    Route::middleware('force.password.change')->group(function () {
+
+        // Owner Routes
+        Route::middleware('role:owner')->prefix('owner')->name('owner.')->group(function () {
+            Route::get('/dashboard', fn () => view('owner.dashboard'))->name('dashboard');
+
+            // Employees (Fig. 9 & Fig. 10)
+            Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+            Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+            Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+            Route::get('/employees/credentials', [EmployeeController::class, 'credentials'])->name('employees.credentials');
+            Route::patch('/employees/{user}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle');
+
+            // Branch Management (Fig. 11)
+            Route::get('/branches', [BranchController::class, 'index'])->name('branches.index');
+            Route::post('/branches', [BranchController::class, 'store'])->name('branches.store');
+            Route::put('/branches/{branch}', [BranchController::class, 'update'])->name('branches.update');
+
+            // Employee Activity Log (Fig. 8)
+            Route::get('/activity-logs', [EmployeeController::class, 'activityLogs'])->name('activity-logs.index');
+        });
+
+        // Cashier Routes (Placeholder para sa Module Build 4 POS)
+        Route::middleware('role:cashier')->prefix('cashier')->name('cashier.')->group(function () {
+            Route::get('/pos', fn () => view('cashier.pos'))->name('pos');
+        });
+
+        // Checker Routes (Placeholder para sa Module Build 2 Inventory)
+        Route::middleware('role:checker')->prefix('checker')->name('checker.')->group(function () {
+            Route::get('/inventory', fn () => view('checker.inventory'))->name('inventory');
+        });
+    });
 });
-
-// --- Employee Management (Owner Only) ---
-Route::middleware(['auth', 'role:Owner'])->group(function () {
-    Route::resource('employees', EmployeeAccountController::class)
-        ->only(['index', 'create', 'store']);
-});
-
-require __DIR__.'/auth.php';

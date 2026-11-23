@@ -6,23 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('activity_logs', function (Blueprint $table) {
-        $table->id('log_id');
-        $table->foreignId('user_id')->constrained('users', 'user_id');
-        $table->string('action');
-        $table->string('module');
-        $table->timestamp('timestamp')->useCurrent();
-    });
+            $table->id('log_id');
+            $table->foreignId('user_id')->constrained('users', 'user_id');
+            $table->string('action');
+            $table->string('module');
+            $table->string('device')->nullable();   // SUGGESTED: Fig. 8 shows a Device column
+            $table->timestamp('timestamp')->useCurrent();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('activity_logs');

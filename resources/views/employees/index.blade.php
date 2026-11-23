@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <div class="max-w-3xl mx-auto p-6">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold">Employee Accounts</h2>
@@ -23,7 +23,7 @@
                     <td class="p-2">{{ $employee->name }}</td>
                     <td class="p-2">{{ $employee->email }}</td>
                     <td class="p-2">{{ $employee->role }}</td>
-                    <td class="p-2">{{ $employee->branch->branch_name ?? '—' }}</td>
+                    <td class="p-2">{{ $employee->branch->branch_name ?? 'â€”' }}</td>
                     <td class="p-2">{{ $employee->status }}</td>
                 </tr>
             @endforeach

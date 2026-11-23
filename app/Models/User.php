@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -11,24 +10,39 @@ class User extends Authenticatable
     public $timestamps = false;
 
     protected $fillable = [
-        'branch_id', 'name', 'email', 'password', 'role', 'status', 'must_change_password', 'date_created',
+        'branch_id', 'name', 'email', 'password', 'role',
+        'status', 'must_change_password', 'date_created',
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = ['password', 'remember_token'];
 
-    public function branch() {
+    protected $casts = [
+        'must_change_password' => 'boolean',
+        'password' => 'hashed',
+    ];
+
+    public function branch()
+    {
         return $this->belongsTo(Branch::class, 'branch_id');
     }
-    public function salesTransactions() {
+
+    public function salesTransactions()
+    {
         return $this->hasMany(SalesTransaction::class, 'cashier_id');
     }
-    public function expenses() {
+
+    public function expenses()
+    {
         return $this->hasMany(Expense::class, 'encoded_by');
     }
-    public function notifications() {
+
+    public function notifications()
+    {
         return $this->hasMany(Notification::class, 'user_id');
     }
-    public function activityLogs() {
+
+    public function activityLogs()
+    {
         return $this->hasMany(ActivityLog::class, 'user_id');
     }
 

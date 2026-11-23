@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <div class="max-w-xl mx-auto p-6">
         <h2 class="text-lg font-semibold mb-4">Add Employee Account</h2>
 
